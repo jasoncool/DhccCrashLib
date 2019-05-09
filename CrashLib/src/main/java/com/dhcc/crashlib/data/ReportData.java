@@ -3,8 +3,7 @@ package com.dhcc.crashlib.data;
 import android.content.Context;
 
 public class ReportData {
-   private   ICollector iCollector;
-
+    private   ICollector iCollector;
     public ReportData(ICollector iCollector){
        this.iCollector=iCollector;
     }

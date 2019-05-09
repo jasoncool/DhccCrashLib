@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">CrashLib</string>
+    <string name="mail_protocl_value">smtp</string>
+    <string name="mail_host_value">smtp.163.com</string>
+    <string name="mail_auth_value">true</string>
+    <string name="mail_to_address">jasoncool_521@qq.com</string>
+    <string name="mail_from_address">jasoncool_521@163.com</string>
+    <string name="mail_from_password">7758521@</string>
 </resources>

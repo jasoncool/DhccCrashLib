@@ -5,11 +5,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
-
-import com.dhcc.crashlib.Configuration;
 import com.dhcc.crashlib.send.SendWorker;
 import com.socks.library.KLog;
-
 import java.io.File;
 
 
@@ -18,8 +15,12 @@ import java.io.File;
  */
 public class CrashService extends IntentService {
 
-    public static final String CRASH_CONTEXT="com.dhcc.componentlib.extra.CRASH_CONTEXT";
-    public static final String CRASH_FILE="com.dhcc.componentlib.extra.CRASH_FILE";
+    private static final String CRASH_CONTEXT="com.dhcc.componentlib.extra.CRASH_CONTEXT";
+    private static final String CRASH_FILE="com.dhcc.componentlib.extra.CRASH_FILE";
+    private static final String IS_SEND_WITH_EMAIL="com.dhcc.componentlib.extra.IS_SEND_WITH_EMAIL";
+    private static final String IS_UPLOAD_LOG_FILE="com.dhcc.componentlib.extra.IS_UPLOAD_LOG_FILE";
+    private static final String IS_SEND_WITH_NET="com.dhcc.componentlib.extra.IS_SEND_WITH_NET";
+    private static final String CRASH_SERVER_URL="com.dhcc.componentlib.extra.CRASH_SERVER_URL";
 
     public CrashService(){
         super("crashService");
@@ -56,34 +57,60 @@ public class CrashService extends IntentService {
            KLog.e("启动崩溃上报进程的Itent不能为空");
            return;
        }
-        String content = intent.getStringExtra(CRASH_CONTEXT);
+        String[] content = intent.getStringArrayExtra(CRASH_CONTEXT);
         String filePath=intent.getStringExtra(CRASH_FILE);
-        if(Configuration.IS_SEND_WITH_EMAIL){
-            if(Configuration.IS_UPLOAD_LOG_FILE){
-                if(filePath!=null&&filePath.length()>0){
+        boolean isSendWithEmail=intent.getBooleanExtra(IS_SEND_WITH_EMAIL,true);
+        boolean isUploadWithFile=intent.getBooleanExtra(IS_UPLOAD_LOG_FILE,true);
+        boolean isSendWithNet=intent.getBooleanExtra(IS_SEND_WITH_NET,true);
+        String crashServerUrl=intent.getStringExtra(CRASH_SERVER_URL);
+        if(isSendWithEmail){
+            if(isUploadWithFile){
+                if(filePath!=null&&filePath.length()>0&&new File(filePath).exists()){
                     File file=new File(filePath);
-                    if(file.exists()){
-                        SendWorker.INSTANCE.sendWithEmail(content,file);
-                    }else{
-                        SendWorker.INSTANCE.sendWithEmail(content);
-                    }
+                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),parseExceptionContent(content),file);
                 }else{
-                    SendWorker.INSTANCE.sendWithEmail(content);
+                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),parseExceptionContent(content));
                 }
             }else{
-                SendWorker.INSTANCE.sendWithEmail(content);
+                SendWorker.INSTANCE.sendWithEmail(getBaseContext(),parseExceptionContent(content));
             }
         }
 
-        if(Configuration.IS_SEND_WITH_NET){
-            SendWorker.INSTANCE.sendToServer(content);
+        if(isSendWithNet){
+            SendWorker.INSTANCE.sendToServer(crashServerUrl,content);
         }
     }
 
-    public static void startCrashService(Context ctn,String content,String filePath){
+    private String parseExceptionContent(String[] exceptionArray){
+        if(exceptionArray==null||exceptionArray.length==0){
+            KLog.e("传入的异常信息不对");
+            return "";
+        }
+        String seprator="<br>";
+        StringBuilder stringBuilder=new StringBuilder();
+        for(String perException:exceptionArray){
+            stringBuilder.append(perException+seprator);
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 启动多进程Service的调用方法
+     * @param ctn 上下文
+     * @param isSendWithEmail 崩溃信息是否发送邮件
+     * @param isUploadLogFile 发送崩溃信息邮件时是否将崩溃信息以附件的形式发送
+     * @param isSendWithNet 是否发送崩溃信息给服务器？
+     * @param exceptionArray 崩溃信息主体
+     * @param filePath 崩溃信息文件路径
+     */
+    public static void startCrashService(Context ctn,String crashServerUrl, boolean isSendWithEmail, boolean isUploadLogFile, boolean isSendWithNet, String[] exceptionArray, String filePath){
         Intent intent=new Intent(ctn,CrashService.class);
-        intent.putExtra(CRASH_CONTEXT,content);
+        intent.putExtra(CRASH_CONTEXT,exceptionArray);
         intent.putExtra(CRASH_FILE,filePath);
+        intent.putExtra(IS_SEND_WITH_EMAIL,isSendWithEmail);
+        intent.putExtra(IS_UPLOAD_LOG_FILE,isUploadLogFile);
+        intent.putExtra(IS_SEND_WITH_NET,isSendWithNet);
+        intent.putExtra(CRASH_SERVER_URL,crashServerUrl);
         ctn.startService(intent);
     }
 

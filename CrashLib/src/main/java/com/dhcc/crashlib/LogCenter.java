@@ -1,6 +1,7 @@
 package com.dhcc.crashlib;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.ArrayMap;
 
 import com.dhcc.crashlib.data.DeviceCollectInfo;
@@ -20,10 +21,17 @@ import java.io.File;
  */
 public class LogCenter implements Thread.UncaughtExceptionHandler {
 
+    private String crashServerUrl;
+    private boolean isSendEmail;
+    private boolean isSendEmailWithFile;
+    private boolean isSendByNet;
+    private int exitWaitTime;
+    private String crashDescription;
+
     /**
      * 存储不同进程下的LogCenter的实例ArrayMap
      */
-    private ArrayMap<String,LogCenter> logCenterMap=new ArrayMap<>();
+    private static ArrayMap<String,LogCenter> logCenterMap=new ArrayMap<>();
 
     /**
      * 系统默认UncaughtExceptionHandler
@@ -35,26 +43,23 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
     private  String tag = this.getClass().getCanonicalName();
     private Context mContext;
 
-    /**
-     * 单例模式
-     * @return
-     */
-    public static LogCenter getInstance() {
-        return LogCenterHolder.SINSTANCE;
+    private LogCenter(Configuration configuration){
+        this.crashServerUrl= configuration.crashServerUrl;
+        this.isSendEmail = configuration.isSendWithEmail;
+        this.isSendEmailWithFile = configuration.isSendEmailWithFile;
+        this.isSendByNet = configuration.isSendWithNet;
+        this.exitWaitTime = configuration.exitWaitTime;
+        this.crashDescription = configuration.crashDescription;
     }
 
-    private static class LogCenterHolder{
-        private final static LogCenter SINSTANCE = new LogCenter();
-    }
 
     /**
      * 根据进程名称获取Logcenter的实例方法
      * @param processName 进程名
      * @return LogCenter实例
      */
-    public LogCenter getLogCenter(String processName){
+    public static LogCenter getLogCenter(String processName){
         LogCenter logCenter;
-        tag=processName;
         if(logCenterMap.containsKey(processName)){
             return logCenterMap.get(processName);
         }else{
@@ -64,8 +69,38 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
         }
     }
 
-    private LogCenter(){
+    public static LogCenter getLogCenter(String processName,@NonNull Configuration configuration){
+        LogCenter logCenter;
+            if(logCenterMap.containsKey(processName)){
+                logCenter= logCenterMap.get(processName);
+                if(logCenter!=null){
+                    logCenter.setConfigtion(configuration);
+                }
+                return logCenter;
+            }else{
+                logCenter=new LogCenter(configuration);
+                logCenterMap.put(processName,logCenter);
+                return logCenter;
+            }
+    }
 
+    private void setConfigtion(Configuration configuration){
+        this.crashServerUrl= configuration.crashServerUrl;
+        this.isSendEmail = configuration.isSendWithEmail;
+        this.isSendEmailWithFile = configuration.isSendEmailWithFile;
+        this.isSendByNet = configuration.isSendWithNet;
+        this.exitWaitTime = configuration.exitWaitTime;
+        this.crashDescription = configuration.crashDescription;
+    }
+
+    private LogCenter(){
+        Configuration configuration= Configuration.getCleanInstance();
+        this.crashServerUrl= configuration.crashServerUrl;
+        this.isSendEmail = configuration.isSendWithEmail;
+        this.isSendEmailWithFile = configuration.isSendEmailWithFile;
+        this.isSendByNet = configuration.isSendWithNet;
+        this.exitWaitTime = configuration.exitWaitTime;
+        this.crashDescription = configuration.crashDescription;
     }
 
     /**
@@ -79,6 +114,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
         // 设置该CrashHandler为程序的默认处理器
         Thread.setDefaultUncaughtExceptionHandler(this);
+        KLog.e("init");
     }
 
     /**
@@ -92,11 +128,13 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
      */
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        KLog.e("uncaughtException");
         if(!handleException(e) && mDefaultHandler != null){
+            KLog.e("mDefaultHandler.uncaughtException");
             mDefaultHandler.uncaughtException(t, e);
         }else {
             try {
-                Thread.sleep(Configuration.APP_WAIT_TIME);
+                Thread.sleep(exitWaitTime);
             } catch (InterruptedException ex) {
              e.printStackTrace();
             }finally {
@@ -129,7 +167,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
                  * 这里之所以用回调是需要确保文件存储完毕后
                  * 再去执行类似于邮件发送或者上传崩溃信息至服务端等操作
                  */
-                CrashLoggerClient.getLogger(tag).e(Configuration.CRASH_DESCRIPTION, e, new SaveCrashLogImpl.IFileCloseListener() {
+                CrashLoggerClient.getLogger(tag).e(crashDescription, e, new SaveCrashLogImpl.IFileCloseListener() {
                     @Override
                     public void onFileClose(String content,File file) {
                         /*
@@ -140,7 +178,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
                         ReportData reportData=new ReportData(new DeviceCollectInfo());
                         String deviceInfo=reportData.collectInfo(mContext);
                         //拼装异常信息，这里使用<br>是因为邮件中如果要换行必须使用html的换行符
-                        String crashInfos=deviceInfo+Configuration.CRASH_INFO_SEPRATOR+"<br>"+content;
+                        String[] exceptionArray=new String[]{deviceInfo,content};
                         /*
                         调用多进程的后台服务CrashService来启动另一个进程执行发邮件和上传服务器等操作
                         为什么要调用多进程的方式来做呢？
@@ -152,7 +190,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
                           android:process="com.dhcc.remote.crashService"/>
                           利用android:process属性将该Service放在com.dhcc.remote.crashService进程下执行
                          */
-                        CrashService.startCrashService(mContext,crashInfos,file.getAbsolutePath());
+                        CrashService.startCrashService(mContext,crashServerUrl,isSendEmail,isSendEmailWithFile,isSendByNet,exceptionArray,file.getAbsolutePath());
                     }
                 });
             }

@@ -1,13 +1,13 @@
 package com.dhcc.crashlib.send.email;
 
-import com.dhcc.crashlib.send.IReportSender;
+import android.content.Context;
+
+import com.dhcc.crashlib.R;
 import com.dhcc.crashlib.utils.SingleTaskPool;
 import com.socks.library.KLog;
-
 import java.io.File;
 import java.util.Date;
 import java.util.Properties;
-
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
@@ -24,20 +24,20 @@ import javax.mail.internet.MimeMultipart;
  * @author jasoncool
  * 邮件发送
  */
-public enum  EmailSender implements IReportSender {
+public enum  EmailSender  {
 
     /**
      * 单例
      */
     INSTANCE;
 
-    private Session getMailSession(){
+    private Session getMailSession(final Context context){
         // 获取系统属性
         Properties properties = new Properties();
         // 设置邮件服务器
-        properties.setProperty(MailConfig.MAIL_PROTOCOL_PROPERTY, MailConfig.MAIL_PROTOCOL_VALUE);
-        properties.setProperty(MailConfig.MAIL_HOST_PROPERTY,MailConfig.MAIL_HOST_VALUE);
-        properties.setProperty(MailConfig.MAIL_AUTH_PROPERTY,MailConfig.MAIL_AUTH_VALUE);
+        properties.setProperty(MailConfig.MAIL_PROTOCOL_PROPERTY, getResourceString(context,R.string.mail_protocl_value));
+        properties.setProperty(MailConfig.MAIL_HOST_PROPERTY,getResourceString(context,R.string.mail_host_value));
+        properties.setProperty(MailConfig.MAIL_AUTH_PROPERTY,getResourceString(context,R.string.mail_auth_value));
         // 开启debug调试
         //properties.setProperty("mail.debug", "true");
         // 获取默认session对象
@@ -46,7 +46,7 @@ public enum  EmailSender implements IReportSender {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         // 登陆邮件发送服务器的用户名和密码
-                        return new PasswordAuthentication(MailConfig.MAIL_FROM_ADDRESS, MailConfig.MAIL_FROM_PASSWORD);
+                        return new PasswordAuthentication(getResourceString(context,R.string.mail_from_address), getResourceString(context,R.string.mail_from_password));
                     }
                 });
     }
@@ -55,14 +55,14 @@ public enum  EmailSender implements IReportSender {
      * 发送普通邮件
      * @throws Exception 捕获的异常
      */
-    private  void sendSimpleEmail(String content) throws Exception {
+    private  void sendSimpleEmail(Context context,String content) throws Exception {
 
         // 创建默认的 MimeMessage 对象
-        MimeMessage message = new MimeMessage(getMailSession());
+        MimeMessage message = new MimeMessage(getMailSession(context));
         // Set From: 头部头字段
-        message.setFrom(new InternetAddress(MailConfig.MAIL_FROM_ADDRESS));
+        message.setFrom(new InternetAddress(getResourceString(context,R.string.mail_from_address)));
         // Set To: 头部头字段
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(MailConfig.MAIL_TO_ADDRESS));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(getResourceString(context,R.string.mail_from_address)));
         // Set Subject: 头部头字段
         message.setSubject(new Date(System.currentTimeMillis())+"错误日志");
         // 设置消息体
@@ -76,9 +76,9 @@ public enum  EmailSender implements IReportSender {
      * @param file 附件
      * @throws Exception 捕获的异常
      */
-    private  void sendFileEmail(String content,File file){
+    private  void sendFileEmail(Context context,String content,File file){
         try{
-            Session session=getMailSession();
+            Session session=getMailSession(context);
             MimeBodyPart text = new MimeBodyPart();
             text.setContent("<h4>"+content+"</h4>", "text/html;charset=UTF-8");
             //创建邮件附件
@@ -91,12 +91,12 @@ public enum  EmailSender implements IReportSender {
             MimeMessage message = new MimeMessage(session);
 
             // Set From: 头部头字段
-            InternetAddress address = new InternetAddress(MailConfig.MAIL_FROM_ADDRESS);
+            InternetAddress address = new InternetAddress(getResourceString(context,R.string.mail_from_address));
             message.setFrom(address);
             message.addRecipient(Message.RecipientType.CC, address);
 
             // Set To: 头部头字段
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(MailConfig.MAIL_TO_ADDRESS));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(getResourceString(context,R.string.mail_to_address)));
 
             //创建容器描述数据关系
             MimeMultipart mp = new MimeMultipart();
@@ -117,14 +117,14 @@ public enum  EmailSender implements IReportSender {
         }
     }
 
+
     /**
-     * 发送文字邮件
-     * @param content 日志主体
+     * 发送不带附件的错误日志
+     * @param content   崩溃信息
      */
-    @Override
-    public String sendLog(String content) {
+    public String sendLog(Context context, String content) {
         try {
-            sendSimpleEmail(content);
+            sendSimpleEmail(context,content);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -136,13 +136,12 @@ public enum  EmailSender implements IReportSender {
     /**
      * 发送带附件的错误日志
      */
-    @Override
-    public void sendLogWithFile(String content,File file) {
+    public void sendLogWithFile(Context context,String content,File file) {
         if(file==null){
             KLog.w("传入Email的日志文件为空");
         }
         try {
-            sendFileEmail(content,file);
+            sendFileEmail(context,content,file);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -153,8 +152,11 @@ public enum  EmailSender implements IReportSender {
     /**
      * 发送完毕后的操作
      */
-    @Override
     public void onSendSuccess() {
         SingleTaskPool.unInit();
+    }
+
+    private String getResourceString(Context context,int stringId){
+       return context.getString(stringId);
     }
 }

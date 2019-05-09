@@ -5,11 +5,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.util.ArrayMap;
-
 import com.socks.library.KLog;
-
 import java.lang.reflect.Field;
 
+
+/**
+ * 获取设备信息
+ * @author jasoncool
+ */
 public class DeviceCollectInfo implements ICollector {
     @Override
     public String collectInfo(Context ctx) {
@@ -26,7 +29,7 @@ public class DeviceCollectInfo implements ICollector {
                 CRASH_INFO_MAP.put("versionCode", versionCode);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            KLog.e("an error occured when collect package info", e);
+            KLog.e("获取包名时发生异常", e);
         }
         Field[] fields = Build.class.getDeclaredFields();
         for (Field field : fields) {
@@ -34,7 +37,7 @@ public class DeviceCollectInfo implements ICollector {
                 field.setAccessible(true);
                 CRASH_INFO_MAP.put(field.getName(), field.get(null).toString());
             } catch (Exception e) {
-                KLog.e("an error occured when collect crash info", e);
+                KLog.e("采集崩溃信息时发生异常", e);
             }
         }
 

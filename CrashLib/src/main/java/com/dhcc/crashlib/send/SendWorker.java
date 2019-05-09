@@ -1,5 +1,6 @@
 package com.dhcc.crashlib.send;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.dhcc.crashlib.send.email.EmailSender;
@@ -15,23 +16,22 @@ public enum SendWorker {
      */
     INSTANCE;
 
-    public void sendWithEmail(String content,@Nullable  File file){
+    public void sendWithEmail(Context context, String content, @Nullable  File file){
 
         if(file==null||!file.exists()){
             KLog.e("发送的文件不能为空!");
             return;
         }
-            EmailSender.INSTANCE.sendLogWithFile(content,file);
+            EmailSender.INSTANCE.sendLogWithFile(context,content,file);
     }
 
-    public void sendWithEmail(String content){
-        EmailSender.INSTANCE.sendLog(content);
+    public void sendWithEmail(Context context,String content){
+        EmailSender.INSTANCE.sendLog(context,content);
     }
 
 
-    public String sendToServer(String content){
-
-      return   NetSender.INSTANCE.sendLog(content);
+    public String sendToServer(String crashServerUrl,String[] contentArray){
+      return   NetSender.INSTANCE.sendLog(crashServerUrl,contentArray);
     }
 
 }
