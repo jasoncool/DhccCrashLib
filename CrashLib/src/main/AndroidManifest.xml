@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dhcc.crashlib" >
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <application>
+        <service
+            android:name="com.dhcc.crashlib.service.CrashService"
+            android:process="com.dhcc.remote.crashService">
+        </service>
+    </application>
+</manifest>
