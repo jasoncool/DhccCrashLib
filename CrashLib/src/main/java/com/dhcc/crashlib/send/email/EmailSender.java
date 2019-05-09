@@ -1,6 +1,8 @@
 package com.dhcc.crashlib.send.email;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.dhcc.crashlib.R;
 import com.dhcc.crashlib.utils.SingleTaskPool;
@@ -31,7 +33,7 @@ public enum  EmailSender  {
      */
     INSTANCE;
 
-    private Session getMailSession(final Context context){
+    private Session getMailSession(final Context context,final EmailConfigBean emailConfigBean){
         // 获取系统属性
         Properties properties = new Properties();
         // 设置邮件服务器
@@ -46,7 +48,7 @@ public enum  EmailSender  {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         // 登陆邮件发送服务器的用户名和密码
-                        return new PasswordAuthentication(getResourceString(context,R.string.mail_from_address), getResourceString(context,R.string.mail_from_password));
+                        return new PasswordAuthentication(emailConfigBean.getSendEmailAddress(), emailConfigBean.getSendEmailPwd());
                     }
                 });
     }
@@ -55,14 +57,18 @@ public enum  EmailSender  {
      * 发送普通邮件
      * @throws Exception 捕获的异常
      */
-    private  void sendSimpleEmail(Context context,String content) throws Exception {
-
+    private  void sendSimpleEmail(Context context,EmailConfigBean emailConfigBean,String content) throws Exception {
+        if(emailConfigBean==null||TextUtils.isEmpty(emailConfigBean.getSendEmailAddress())||TextUtils.isEmpty(emailConfigBean.getSendEmailPwd())||TextUtils.isEmpty(emailConfigBean.getToEmailAddress())){
+            KLog.e("Email配置不正确!");
+            Toast.makeText(context,"Email配置不正确!",Toast.LENGTH_SHORT).show();
+            return;
+        }
         // 创建默认的 MimeMessage 对象
-        MimeMessage message = new MimeMessage(getMailSession(context));
+        MimeMessage message = new MimeMessage(getMailSession(context,emailConfigBean));
         // Set From: 头部头字段
-        message.setFrom(new InternetAddress(getResourceString(context,R.string.mail_from_address)));
+        message.setFrom(new InternetAddress(emailConfigBean.getSendEmailAddress()));
         // Set To: 头部头字段
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(getResourceString(context,R.string.mail_from_address)));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailConfigBean.getToEmailAddress()));
         // Set Subject: 头部头字段
         message.setSubject(new Date(System.currentTimeMillis())+"错误日志");
         // 设置消息体
@@ -76,9 +82,14 @@ public enum  EmailSender  {
      * @param file 附件
      * @throws Exception 捕获的异常
      */
-    private  void sendFileEmail(Context context,String content,File file){
+    private  void sendFileEmail(Context context,EmailConfigBean emailConfigBean,String content,File file){
+        if(emailConfigBean==null||TextUtils.isEmpty(emailConfigBean.getSendEmailAddress())||TextUtils.isEmpty(emailConfigBean.getSendEmailPwd())||TextUtils.isEmpty(emailConfigBean.getToEmailAddress())){
+            KLog.e("Email配置不正确!");
+            Toast.makeText(context,"Email配置不正确!",Toast.LENGTH_SHORT).show();
+            return;
+        }
         try{
-            Session session=getMailSession(context);
+            Session session=getMailSession(context,emailConfigBean);
             MimeBodyPart text = new MimeBodyPart();
             text.setContent("<h4>"+content+"</h4>", "text/html;charset=UTF-8");
             //创建邮件附件
@@ -91,12 +102,12 @@ public enum  EmailSender  {
             MimeMessage message = new MimeMessage(session);
 
             // Set From: 头部头字段
-            InternetAddress address = new InternetAddress(getResourceString(context,R.string.mail_from_address));
+            InternetAddress address = new InternetAddress(emailConfigBean.getSendEmailAddress());
             message.setFrom(address);
             message.addRecipient(Message.RecipientType.CC, address);
 
             // Set To: 头部头字段
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(getResourceString(context,R.string.mail_to_address)));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailConfigBean.getToEmailAddress()));
 
             //创建容器描述数据关系
             MimeMultipart mp = new MimeMultipart();
@@ -122,9 +133,9 @@ public enum  EmailSender  {
      * 发送不带附件的错误日志
      * @param content   崩溃信息
      */
-    public String sendLog(Context context, String content) {
+    public String sendLog(Context context,EmailConfigBean emailConfigBean, String content) {
         try {
-            sendSimpleEmail(context,content);
+            sendSimpleEmail(context,emailConfigBean,content);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -136,12 +147,12 @@ public enum  EmailSender  {
     /**
      * 发送带附件的错误日志
      */
-    public void sendLogWithFile(Context context,String content,File file) {
+    public void sendLogWithFile(Context context,EmailConfigBean emailConfigBean,String content,File file) {
         if(file==null){
             KLog.w("传入Email的日志文件为空");
         }
         try {
-            sendFileEmail(context,content,file);
+            sendFileEmail(context,emailConfigBean,content,file);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {

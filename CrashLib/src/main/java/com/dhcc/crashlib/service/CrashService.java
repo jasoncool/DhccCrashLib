@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import com.dhcc.crashlib.send.SendWorker;
+import com.dhcc.crashlib.send.email.EmailConfigBean;
 import com.socks.library.KLog;
 import java.io.File;
 
@@ -21,7 +22,7 @@ public class CrashService extends IntentService {
     private static final String IS_UPLOAD_LOG_FILE="com.dhcc.componentlib.extra.IS_UPLOAD_LOG_FILE";
     private static final String IS_SEND_WITH_NET="com.dhcc.componentlib.extra.IS_SEND_WITH_NET";
     private static final String CRASH_SERVER_URL="com.dhcc.componentlib.extra.CRASH_SERVER_URL";
-
+    private static final String EMAIL_CONFIG="com.dhcc.componentlib.extra.EMAIL_CONFIG";
     public CrashService(){
         super("crashService");
     }
@@ -63,16 +64,18 @@ public class CrashService extends IntentService {
         boolean isUploadWithFile=intent.getBooleanExtra(IS_UPLOAD_LOG_FILE,true);
         boolean isSendWithNet=intent.getBooleanExtra(IS_SEND_WITH_NET,true);
         String crashServerUrl=intent.getStringExtra(CRASH_SERVER_URL);
+        EmailConfigBean emailConfigBean=intent.getParcelableExtra(EMAIL_CONFIG);
+
         if(isSendWithEmail){
             if(isUploadWithFile){
                 if(filePath!=null&&filePath.length()>0&&new File(filePath).exists()){
                     File file=new File(filePath);
-                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),parseExceptionContent(content),file);
+                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(content),file);
                 }else{
-                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),parseExceptionContent(content));
+                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(content));
                 }
             }else{
-                SendWorker.INSTANCE.sendWithEmail(getBaseContext(),parseExceptionContent(content));
+                SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(content));
             }
         }
 
@@ -103,7 +106,7 @@ public class CrashService extends IntentService {
      * @param exceptionArray 崩溃信息主体
      * @param filePath 崩溃信息文件路径
      */
-    public static void startCrashService(Context ctn,String crashServerUrl, boolean isSendWithEmail, boolean isUploadLogFile, boolean isSendWithNet, String[] exceptionArray, String filePath){
+    public static void startCrashService(Context ctn, String crashServerUrl, boolean isSendWithEmail, boolean isUploadLogFile, boolean isSendWithNet, String[] exceptionArray, String filePath, EmailConfigBean emailConfigBean){
         Intent intent=new Intent(ctn,CrashService.class);
         intent.putExtra(CRASH_CONTEXT,exceptionArray);
         intent.putExtra(CRASH_FILE,filePath);
@@ -111,6 +114,7 @@ public class CrashService extends IntentService {
         intent.putExtra(IS_UPLOAD_LOG_FILE,isUploadLogFile);
         intent.putExtra(IS_SEND_WITH_NET,isSendWithNet);
         intent.putExtra(CRASH_SERVER_URL,crashServerUrl);
+        intent.putExtra(EMAIL_CONFIG,emailConfigBean);
         ctn.startService(intent);
     }
 

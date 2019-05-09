@@ -8,6 +8,7 @@ import com.dhcc.crashlib.data.DeviceCollectInfo;
 import com.dhcc.crashlib.data.ReportData;
 import com.dhcc.crashlib.log.CrashLoggerClient;
 import com.dhcc.crashlib.log.SaveCrashLogImpl;
+import com.dhcc.crashlib.send.email.EmailConfigBean;
 import com.dhcc.crashlib.service.CrashService;
 import com.dhcc.crashlib.utils.SingleTaskPool;
 import com.socks.library.KLog;
@@ -27,6 +28,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
     private boolean isSendByNet;
     private int exitWaitTime;
     private String crashDescription;
+    private EmailConfigBean emailConfigBean;
 
     /**
      * 存储不同进程下的LogCenter的实例ArrayMap
@@ -50,6 +52,8 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
         this.isSendByNet = configuration.isSendWithNet;
         this.exitWaitTime = configuration.exitWaitTime;
         this.crashDescription = configuration.crashDescription;
+        this.emailConfigBean=configuration.emailConfigBean;
+
     }
 
 
@@ -91,6 +95,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
         this.isSendByNet = configuration.isSendWithNet;
         this.exitWaitTime = configuration.exitWaitTime;
         this.crashDescription = configuration.crashDescription;
+        this.emailConfigBean=configuration.emailConfigBean;
     }
 
     private LogCenter(){
@@ -101,6 +106,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
         this.isSendByNet = configuration.isSendWithNet;
         this.exitWaitTime = configuration.exitWaitTime;
         this.crashDescription = configuration.crashDescription;
+        this.emailConfigBean=configuration.emailConfigBean;
     }
 
     /**
@@ -190,7 +196,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
                           android:process="com.dhcc.remote.crashService"/>
                           利用android:process属性将该Service放在com.dhcc.remote.crashService进程下执行
                          */
-                        CrashService.startCrashService(mContext,crashServerUrl,isSendEmail,isSendEmailWithFile,isSendByNet,exceptionArray,file.getAbsolutePath());
+                        CrashService.startCrashService(mContext,crashServerUrl,isSendEmail,isSendEmailWithFile,isSendByNet,exceptionArray,file.getAbsolutePath(),emailConfigBean);
                     }
                 });
             }

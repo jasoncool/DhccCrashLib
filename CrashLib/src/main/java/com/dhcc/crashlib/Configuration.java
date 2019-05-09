@@ -1,5 +1,7 @@
 package com.dhcc.crashlib;
 
+import com.dhcc.crashlib.send.email.EmailConfigBean;
+
 /**
  * @author jasoncool
  * 异常设置类
@@ -12,6 +14,7 @@ public final class Configuration {
     public  boolean isSendWithNet;
     public int exitWaitTime;
     public String crashDescription;
+    public EmailConfigBean emailConfigBean;
 
 
 
@@ -56,6 +59,11 @@ public final class Configuration {
 
     public Configuration setCrashDescription(String crashDescription){
         this.crashDescription=crashDescription;
+        return  this;
+    }
+
+    public Configuration setEmailConfig(EmailConfigBean emailConfig){
+       this.emailConfigBean=emailConfig;
         return  this;
     }
 
