@@ -1,7 +1,9 @@
-package com.dhcc.crashlib;
+package com.dhcc.test;
 
 import android.app.Application;
 
+import com.dhcc.crashlib.Configuration;
+import com.dhcc.crashlib.LogCenter;
 import com.dhcc.crashlib.send.email.EmailConfigBean;
 
 public class MyApplication extends Application {

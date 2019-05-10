@@ -1,4 +1,4 @@
-package com.dhcc.crashlib;
+package com.dhcc.test;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

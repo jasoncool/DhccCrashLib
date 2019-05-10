@@ -5,8 +5,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import com.dhcc.crashlib.send.SendWorker;
+
 import com.dhcc.crashlib.send.email.EmailConfigBean;
+import com.dhcc.crashlib.send.SendWorker;
 import com.socks.library.KLog;
 import java.io.File;
 
