@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.util.ArrayMap;
-
 import com.dhcc.crashlib.data.DeviceCollectInfo;
 import com.dhcc.crashlib.data.ICollector;
 import com.dhcc.crashlib.data.ReportData;
@@ -15,7 +14,6 @@ import com.dhcc.crashlib.service.CrashService;
 import com.dhcc.crashlib.service.SerializableHashMap;
 import com.dhcc.crashlib.utils.SingleTaskPool;
 import com.socks.library.KLog;
-
 import java.io.File;
 import java.util.HashMap;
 
