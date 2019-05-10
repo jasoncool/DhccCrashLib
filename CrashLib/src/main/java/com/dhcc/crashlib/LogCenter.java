@@ -1,6 +1,7 @@
 package com.dhcc.crashlib;
 
 import android.content.Context;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.util.ArrayMap;
 
@@ -16,7 +17,6 @@ import com.dhcc.crashlib.utils.SingleTaskPool;
 import com.socks.library.KLog;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -51,6 +51,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
     private  String tag = this.getClass().getCanonicalName();
     private Context mContext;
 
+    @Keep
     private LogCenter(Configuration configuration){
         this.crashServerUrl= configuration.crashServerUrl;
         this.isSendEmail = configuration.isSendWithEmail;

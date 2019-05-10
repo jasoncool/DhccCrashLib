@@ -37,9 +37,9 @@ public enum  EmailSender  {
         // 获取系统属性
         Properties properties = new Properties();
         // 设置邮件服务器
-        properties.setProperty(MailConfig.MAIL_PROTOCOL_PROPERTY, getResourceString(context,R.string.mail_protocl_value));
-        properties.setProperty(MailConfig.MAIL_HOST_PROPERTY,getResourceString(context,R.string.mail_host_value));
-        properties.setProperty(MailConfig.MAIL_AUTH_PROPERTY,getResourceString(context,R.string.mail_auth_value));
+        properties.setProperty(MailConfig.MAIL_PROTOCOL_PROPERTY, getResourceString(context,R.string.dhc_crash_mail_protocl_value));
+        properties.setProperty(MailConfig.MAIL_HOST_PROPERTY,getResourceString(context,R.string.dhc_crash_mail_host_value));
+        properties.setProperty(MailConfig.MAIL_AUTH_PROPERTY,getResourceString(context,R.string.dhc_crash_mail_auth_value));
         // 开启debug调试
         //properties.setProperty("mail.debug", "true");
         // 获取默认session对象

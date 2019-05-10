@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <public name="dhc_crash_mail_protocl_value" type="string" />
+    <public name="dhc_crash_mail_host_value" type="string" />
+    <public name="dhc_crash_mail_auth_value" type="string" />
+</resources>

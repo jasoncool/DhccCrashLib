@@ -1,7 +1,5 @@
 <resources>
-    <string name="app_name">CrashLib</string>
-    <string name="mail_protocl_value">smtp</string>
-    <string name="mail_host_value">smtp.163.com</string>
-    <string name="mail_auth_value">true</string>
-
+    <string name="dhc_crash_mail_protocl_value">smtp</string>
+    <string name="dhc_crash_mail_host_value">smtp.163.com</string>
+    <string name="dhc_crash_mail_auth_value">true</string>
 </resources>

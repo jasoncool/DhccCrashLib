@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.dhcc.crashlib.Configuration;
 import com.dhcc.crashlib.LogCenter;
-import com.dhcc.crashlib.data.DeviceCollectInfo;
 import com.dhcc.crashlib.send.email.EmailConfigBean;
 
 public class MyApplication extends Application {
