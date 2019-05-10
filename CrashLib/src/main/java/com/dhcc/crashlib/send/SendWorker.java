@@ -9,6 +9,7 @@ import com.dhcc.crashlib.send.net.NetSender;
 import com.socks.library.KLog;
 
 import java.io.File;
+import java.util.HashMap;
 
 public enum SendWorker {
 
@@ -31,7 +32,7 @@ public enum SendWorker {
     }
 
 
-    public String sendToServer(String crashServerUrl,String[] contentArray){
+    public String sendToServer(String crashServerUrl,HashMap<String,String> contentArray){
       return   NetSender.INSTANCE.sendLog(crashServerUrl,contentArray);
     }
 

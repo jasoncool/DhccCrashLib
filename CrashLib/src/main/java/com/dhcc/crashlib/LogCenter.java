@@ -5,15 +5,19 @@ import android.support.annotation.NonNull;
 import android.util.ArrayMap;
 
 import com.dhcc.crashlib.data.DeviceCollectInfo;
+import com.dhcc.crashlib.data.ICollector;
 import com.dhcc.crashlib.data.ReportData;
 import com.dhcc.crashlib.log.CrashLoggerClient;
 import com.dhcc.crashlib.log.SaveCrashLogImpl;
 import com.dhcc.crashlib.send.email.EmailConfigBean;
 import com.dhcc.crashlib.service.CrashService;
+import com.dhcc.crashlib.service.SerializableHashMap;
 import com.dhcc.crashlib.utils.SingleTaskPool;
 import com.socks.library.KLog;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 日志中心
@@ -29,6 +33,8 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
     private int exitWaitTime;
     private String crashDescription;
     private EmailConfigBean emailConfigBean;
+    private HashMap<String,String> exceptionMap=new HashMap<>();
+    private SerializableHashMap serializableHashMap=new SerializableHashMap();
 
     /**
      * 存储不同进程下的LogCenter的实例ArrayMap
@@ -184,7 +190,9 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
                         ReportData reportData=new ReportData(new DeviceCollectInfo());
                         String deviceInfo=reportData.collectInfo(mContext);
                         //拼装异常信息，这里使用<br>是因为邮件中如果要换行必须使用html的换行符
-                        String[] exceptionArray=new String[]{deviceInfo,content};
+                        exceptionMap.put("deviceInfo",deviceInfo);
+                        exceptionMap.put("exceptionInfo",content);
+                        serializableHashMap.setMap(exceptionMap);
                         /*
                         调用多进程的后台服务CrashService来启动另一个进程执行发邮件和上传服务器等操作
                         为什么要调用多进程的方式来做呢？
@@ -196,7 +204,7 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
                           android:process="com.dhcc.remote.crashService"/>
                           利用android:process属性将该Service放在com.dhcc.remote.crashService进程下执行
                          */
-                        CrashService.startCrashService(mContext,crashServerUrl,isSendEmail,isSendEmailWithFile,isSendByNet,exceptionArray,file.getAbsolutePath(),emailConfigBean);
+                        CrashService.startCrashService(mContext,crashServerUrl,isSendEmail,isSendEmailWithFile,isSendByNet,serializableHashMap,file.getAbsolutePath(),emailConfigBean);
                     }
                 });
             }
@@ -204,4 +212,12 @@ public class LogCenter implements Thread.UncaughtExceptionHandler {
         return true;
     }
 
+    public <T extends ICollector> LogCenter strategy(T t,String key) {
+        ReportData reportData=new ReportData(t);
+        String collectInfo=reportData.collectInfo(mContext);
+        if(exceptionMap!=null){
+            exceptionMap.put(key,collectInfo);
+        }
+        return this;
+    }
 }

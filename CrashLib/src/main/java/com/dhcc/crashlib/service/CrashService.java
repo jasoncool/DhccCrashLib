@@ -10,6 +10,9 @@ import com.dhcc.crashlib.send.email.EmailConfigBean;
 import com.dhcc.crashlib.send.SendWorker;
 import com.socks.library.KLog;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -59,7 +62,7 @@ public class CrashService extends IntentService {
            KLog.e("启动崩溃上报进程的Itent不能为空");
            return;
        }
-        String[] content = intent.getStringArrayExtra(CRASH_CONTEXT);
+        SerializableHashMap exceptionMap = (SerializableHashMap) intent.getSerializableExtra(CRASH_CONTEXT);
         String filePath=intent.getStringExtra(CRASH_FILE);
         boolean isSendWithEmail=intent.getBooleanExtra(IS_SEND_WITH_EMAIL,true);
         boolean isUploadWithFile=intent.getBooleanExtra(IS_UPLOAD_LOG_FILE,true);
@@ -71,29 +74,32 @@ public class CrashService extends IntentService {
             if(isUploadWithFile){
                 if(filePath!=null&&filePath.length()>0&&new File(filePath).exists()){
                     File file=new File(filePath);
-                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(content),file);
+                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(exceptionMap.getMap(),true),file);
                 }else{
-                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(content));
+                    SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(exceptionMap.getMap(),true));
                 }
             }else{
-                SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(content));
+                SendWorker.INSTANCE.sendWithEmail(getBaseContext(),emailConfigBean,parseExceptionContent(exceptionMap.getMap(),true));
             }
         }
 
         if(isSendWithNet){
-            SendWorker.INSTANCE.sendToServer(crashServerUrl,content);
+            SendWorker.INSTANCE.sendToServer(crashServerUrl,exceptionMap.getMap());
         }
     }
 
-    private String parseExceptionContent(String[] exceptionArray){
-        if(exceptionArray==null||exceptionArray.length==0){
+    private String parseExceptionContent(HashMap<String,String> exceptionMap, boolean isEmailType){
+        if(exceptionMap==null||exceptionMap.size()==0){
             KLog.e("传入的异常信息不对");
             return "";
         }
         String seprator="<br>";
+        if(!isEmailType){
+            seprator="\n";
+        }
         StringBuilder stringBuilder=new StringBuilder();
-        for(String perException:exceptionArray){
-            stringBuilder.append(perException+seprator);
+        for(Map.Entry<String,String> perException:exceptionMap.entrySet()){
+            stringBuilder.append(perException.getValue()+seprator);
         }
         return stringBuilder.toString();
     }
@@ -104,12 +110,12 @@ public class CrashService extends IntentService {
      * @param isSendWithEmail 崩溃信息是否发送邮件
      * @param isUploadLogFile 发送崩溃信息邮件时是否将崩溃信息以附件的形式发送
      * @param isSendWithNet 是否发送崩溃信息给服务器？
-     * @param exceptionArray 崩溃信息主体
+     * @param exceptionMap 崩溃信息主体Map
      * @param filePath 崩溃信息文件路径
      */
-    public static void startCrashService(Context ctn, String crashServerUrl, boolean isSendWithEmail, boolean isUploadLogFile, boolean isSendWithNet, String[] exceptionArray, String filePath, EmailConfigBean emailConfigBean){
+    public static void startCrashService(Context ctn, String crashServerUrl, boolean isSendWithEmail, boolean isUploadLogFile, boolean isSendWithNet, SerializableHashMap exceptionMap, String filePath, EmailConfigBean emailConfigBean){
         Intent intent=new Intent(ctn,CrashService.class);
-        intent.putExtra(CRASH_CONTEXT,exceptionArray);
+        intent.putExtra(CRASH_CONTEXT,exceptionMap);
         intent.putExtra(CRASH_FILE,filePath);
         intent.putExtra(IS_SEND_WITH_EMAIL,isSendWithEmail);
         intent.putExtra(IS_UPLOAD_LOG_FILE,isUploadLogFile);
