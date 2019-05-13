@@ -82,6 +82,19 @@ public class TestCollectInfo implements ICollector {
 
 由于每个项目不同，可能需要采集的异常信息外的其他一些手机信息都不尽相同，我这里在源码中只设计了Key为deviceInfo和Key为exceptionInfo的两种捕获信息，deviceInfo主要是为了捕获手机信息的而exceptionInfo就是捕获异常崩溃信息的了，如果你的项目中还需要捕获其他类型的信息，可以通过实现ICollector接口来定义自己想提交的采集信息即可，记得在初始化时调用.strategy(new TestCollectInfo(), "网络属性的Key")将采集信息传入即可。
 
+## 面临的问题
+在网上可以看到很多类似于全局捕获异常发送服务器或者发送邮件给指定邮箱的功能，但是这些文章都没有实际的深入场景，只是写出了逻辑代码，这样就会面临到一个很实际的问题:
+
+异常发生时，我们要做的是将异常信息和一些其他捕获到的手机信息或上传服务器或通过邮件发送给指定邮箱，但是如果这个时间过长，导致App已经退出，进程退出后，此进程的线程也不复存在，那么如果你要做的逻辑操作还没做完，那么你这次异常的捕获就是失败的。
+
+基于这个原因，我在异常发生时做的操作是这样的：
+
+1. 捕获异常并写入本地异常捕获文件;
+2. 给写入文件的操作加入回调接口，告知主线程异常写入完毕;
+3. 将异常信息、异常文件路径、手机设备信息等参数传入子进程的IntentService;
+
+由于是子进程启动的Service进行的业务逻辑操作，就算主进程已经退出，也不会影响子进程的耗时操作，问题也就随之解决了。
+
 ## 配套的Express文件
 
 你可能会纳闷了，什么是Express？这文件是干嘛的？
@@ -116,7 +129,7 @@ app.use(function(req, res, next) {
 
 
 //处理/api/crashs的POST请求
-app.post('/api/crash', function(req, res) {
+app.post('/api/crashs', function(req, res) {
   fs.readFile(CRASH_FILE, function(err, data) {
     if (err) {
       console.error(err);
@@ -185,7 +198,8 @@ LogCenter.getLogCenter("com.dhcc.crashInfo", configuration)
 ## 整体设计架构
 
 
-![](https://user-gold-cdn.xitu.io/2019/5/10/16aa114548742549?w=1184&h=663&f=png&s=42766)
+
+![](https://user-gold-cdn.xitu.io/2019/5/13/16aaede931d4f2ef?w=1204&h=663&f=png&s=46092)
 
 源码就不细说了，大家可以自己去看，有什么问题可以给我留言，谢谢你看完。
 
