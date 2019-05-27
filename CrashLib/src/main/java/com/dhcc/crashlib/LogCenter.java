@@ -1,9 +1,11 @@
 package com.dhcc.crashlib;
 
 import android.content.Context;
-import android.support.annotation.Keep;
-import android.support.annotation.NonNull;
 import android.util.ArrayMap;
+
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+
 import com.dhcc.crashlib.data.DeviceCollectInfo;
 import com.dhcc.crashlib.data.ICollector;
 import com.dhcc.crashlib.data.ReportData;

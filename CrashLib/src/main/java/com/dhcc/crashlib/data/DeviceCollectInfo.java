@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.util.ArrayMap;
+
+import androidx.collection.ArrayMap;
+
 import com.socks.library.KLog;
 import java.lang.reflect.Field;
 

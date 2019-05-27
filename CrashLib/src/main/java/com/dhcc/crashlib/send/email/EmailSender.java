@@ -56,7 +56,6 @@ public enum  EmailSender  {
 
     /**
      * 发送普通邮件
-     * @throws Exception 捕获的异常
      */
     private  void sendSimpleEmail(Context context,EmailConfigBean emailConfigBean,String content) throws Exception {
 
@@ -87,7 +86,6 @@ public enum  EmailSender  {
     /**
      * 发送带附件的邮件
      * @param file 附件
-     * @throws Exception 捕获的异常
      */
     private  void sendFileEmail(Context context,EmailConfigBean emailConfigBean,String content,File file){
 

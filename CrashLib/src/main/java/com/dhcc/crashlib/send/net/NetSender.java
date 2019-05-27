@@ -2,8 +2,6 @@ package com.dhcc.crashlib.send.net;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.ArrayMap;
-import android.widget.Toast;
 
 import com.dhcc.crashlib.utils.HttpConnectionUtil;
 import com.socks.library.KLog;

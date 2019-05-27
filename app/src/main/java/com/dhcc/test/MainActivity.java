@@ -1,19 +1,11 @@
 package com.dhcc.test;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import androidx.appcompat.app.AppCompatActivity;
 
-import me.weishu.reflection.Reflection;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";

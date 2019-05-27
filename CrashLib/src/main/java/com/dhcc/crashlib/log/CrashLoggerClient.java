@@ -4,8 +4,9 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -101,7 +102,7 @@ public class CrashLoggerClient {
      * 线程Id,线程名称，线程优先级，线程组名等
      * @return  时间戳+线程信息+异常所在文件名+异常所在行号+异常所在方法名+异常堆栈信息
      */
-    private String getExceptionInfo(@Nullable  Throwable e) {
+    private String getExceptionInfo(@Nullable Throwable e) {
         String stacktraceAsString="";
         if(e!=null){
             Writer result = new StringWriter();

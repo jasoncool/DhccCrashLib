@@ -4,13 +4,11 @@ import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
-
+import androidx.annotation.Nullable;
 import com.dhcc.crashlib.send.email.EmailConfigBean;
 import com.dhcc.crashlib.send.SendWorker;
 import com.socks.library.KLog;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

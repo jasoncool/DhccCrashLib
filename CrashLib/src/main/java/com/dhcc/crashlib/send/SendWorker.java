@@ -1,7 +1,8 @@
 package com.dhcc.crashlib.send;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.dhcc.crashlib.send.email.EmailConfigBean;
 import com.dhcc.crashlib.send.email.EmailSender;
@@ -18,7 +19,7 @@ public enum SendWorker {
      */
     INSTANCE;
 
-    public void sendWithEmail(Context context, EmailConfigBean emailConfigBean, String content, @Nullable  File file){
+    public void sendWithEmail(Context context, EmailConfigBean emailConfigBean, String content, @Nullable File file){
 
         if(file==null||!file.exists()){
             KLog.e("发送的文件不能为空!");
