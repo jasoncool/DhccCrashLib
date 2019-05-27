@@ -1,5 +1,9 @@
 package com.dhcc.crashlib.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -10,9 +14,12 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 网络工具
+ *
  * @author jasoncool
  */
 public class HttpConnectionUtil {
@@ -108,6 +115,7 @@ public class HttpConnectionUtil {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+
                 } finally {
                     if (reader != null) {
                         reader.close();//关闭流
@@ -119,7 +127,8 @@ public class HttpConnectionUtil {
                 return sb.toString();
             }
         });
-        new Thread(task).start();
+        SingleTaskPool.execute(task);
+        //new Thread(task).start();
         String s = null;
         try {
             s = task.get();
@@ -129,8 +138,80 @@ public class HttpConnectionUtil {
         return s;
     }
 
-    interface  onNetCallBackListener{
-       void onNetCallBack(String result);
+    interface onNetCallBackListener {
+        void onNetCallBack(String result);
+    }
+
+    public boolean isNetworkConnected(Context context) {
+        if (context != null) {
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            if (mNetworkInfo != null) {
+                return mNetworkInfo.isConnected();
+            }
+        }
+        return false;
+    }
+
+    public boolean isIP(String addr) {
+        if (addr.length() < 7 || addr.length() > 15 || "".equals(addr)) {
+            return false;
+        }
+        /*
+         * 判断IP格式和范围
+         */
+        String rexp = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";
+        Pattern pat = Pattern.compile(rexp);
+        Matcher mat = pat.matcher(addr);
+        boolean ipAddress = mat.find();
+        //============对之前的ip判断的bug在进行判断
+        if (ipAddress) {
+            String ips[] = addr.split("\\.");
+            if (ips.length == 4) {
+                try {
+                    for (String ip : ips) {
+                        if (Integer.parseInt(ip) < 0 || Integer.parseInt(ip) > 255) {
+                            return false;
+                        }
+                    }
+                } catch (Exception e) {
+                    return false;
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return ipAddress;
+    }
+
+
+    public boolean isURL(String str) {
+        String regex = "^((https|http|ftp|rtsp|mms)?://)"
+                + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //ftp的user@
+                + "(([0-9]{1,3}\\.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184
+                + "|" // 允许IP和DOMAIN（域名）
+                + "([0-9a-z_!~*'()-]+\\.)*" // 域名- www.
+//                 + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\\." // 二级域名
+                + "[a-z]{2,6})" // first level domain- .com or .museum
+                + "(:[0-9]{1,4})?" // 端口- :80
+                + "((/?)|" // a slash isn't required if there is no file name
+                + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+        return match(regex, str);
+
+
+    }
+
+    /**
+     * @param regex 正则表达式字符串
+     * @param str   要匹配的字符串
+     * @return 如果str 符合 regex的正则表达式格式,返回true, 否则返回 false;
+     */
+    private boolean match(String regex, String str) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
     }
 
 }

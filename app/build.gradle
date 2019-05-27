@@ -26,5 +26,6 @@ dependencies {
     implementation 'com.github.zhaokaiqiang.klog:library:1.6.0'
     //Email的发送组件
     implementation "com.sun.mail:android-mail:1.6.0"
+    implementation 'me.weishu:free_reflection:2.0.0'
 
 }

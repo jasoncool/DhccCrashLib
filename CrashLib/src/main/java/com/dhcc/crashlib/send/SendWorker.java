@@ -32,8 +32,8 @@ public enum SendWorker {
     }
 
 
-    public String sendToServer(String crashServerUrl,HashMap<String,String> contentArray){
-      return   NetSender.INSTANCE.sendLog(crashServerUrl,contentArray);
+    public String sendToServer(Context context,String crashServerUrl,HashMap<String,String> contentArray){
+      return   NetSender.INSTANCE.sendLog(context,crashServerUrl,contentArray);
     }
 
 }

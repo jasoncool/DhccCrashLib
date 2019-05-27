@@ -84,7 +84,7 @@ public class CrashService extends IntentService {
         }
 
         if(isSendWithNet){
-            SendWorker.INSTANCE.sendToServer(crashServerUrl,exceptionMap.getMap());
+            SendWorker.INSTANCE.sendToServer(getBaseContext(),crashServerUrl,exceptionMap.getMap());
         }
     }
 

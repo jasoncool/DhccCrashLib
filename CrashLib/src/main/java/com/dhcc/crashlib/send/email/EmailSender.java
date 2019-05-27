@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.dhcc.crashlib.R;
+import com.dhcc.crashlib.utils.HttpConnectionUtil;
 import com.dhcc.crashlib.utils.SingleTaskPool;
 import com.socks.library.KLog;
 import java.io.File;
@@ -58,6 +59,12 @@ public enum  EmailSender  {
      * @throws Exception 捕获的异常
      */
     private  void sendSimpleEmail(Context context,EmailConfigBean emailConfigBean,String content) throws Exception {
+
+        if(!HttpConnectionUtil.getHttp().isNetworkConnected(context)){
+            KLog.e("手机网络不可用");
+            return;
+        }
+
         if(emailConfigBean==null||TextUtils.isEmpty(emailConfigBean.getSendEmailAddress())||TextUtils.isEmpty(emailConfigBean.getSendEmailPwd())||TextUtils.isEmpty(emailConfigBean.getToEmailAddress())){
             KLog.e("Email配置不正确!");
             Toast.makeText(context,"Email配置不正确!",Toast.LENGTH_SHORT).show();
@@ -83,6 +90,11 @@ public enum  EmailSender  {
      * @throws Exception 捕获的异常
      */
     private  void sendFileEmail(Context context,EmailConfigBean emailConfigBean,String content,File file){
+
+        if(!HttpConnectionUtil.getHttp().isNetworkConnected(context)){
+            KLog.e("手机网络不可用");
+            return;
+        }
         if(emailConfigBean==null||TextUtils.isEmpty(emailConfigBean.getSendEmailAddress())||TextUtils.isEmpty(emailConfigBean.getSendEmailPwd())||TextUtils.isEmpty(emailConfigBean.getToEmailAddress())){
             KLog.e("Email配置不正确!");
             Toast.makeText(context,"Email配置不正确!",Toast.LENGTH_SHORT).show();
