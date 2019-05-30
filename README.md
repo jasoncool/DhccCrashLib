@@ -1,5 +1,5 @@
 ---
-
+最新版本 1.0.5
 ## 异常崩溃怎么办？
 
 关于异常崩溃是每个App都要面对的，平时开发还好，在调试状态下遇到的问题，可以通过LogCat打印的异常日志信息进行分析处理，但是一旦App上线后，大量用户安装了你的应用，每个用户的手机大小、传感器、SDK版本都不尽相同，可能你在测试机上跑的稳稳的应用，到了客户手机上就会出现一些莫名其妙的异常，如果只是一些内存泄露的问题可能还好，最起码不会瞬间崩溃，但是如果遇到一些可以导致手机崩溃Bug的话，你让出问题的用户来复现Bug是不可能的，所以，全局异常捕获就显得很重要了，而DhccCrashLib就是一个全局异常捕获的组件。
@@ -21,8 +21,9 @@
 然后在你的项目的build.gradle中添加依赖:
 
 ```xml
-implementation 'com.dhcc.crashlib:CrashLib:1.0.3'
-implementation 'com.android.support:appcompat-v7:28.0.0'
+implementation 'com.dhcc.crashlib:CrashLib:1.0.5'
+implementation 'androidx.appcompat:appcompat:1.0.2'
+//implementation 'com.android.support:appcompat-v7:28.0.0'
 implementation 'com.github.zhaokaiqiang.klog:library:1.6.0'
 implementation "com.sun.mail:android-mail:1.6.0"
 ```
