@@ -18,7 +18,7 @@ public class MyApplication extends Application {
      * 初始化崩溃采集服务
      */
     private void initCrash() {
-        EmailConfigBean emailConfigBean = new EmailConfigBean("jasoncool_521@163.com", "jasoncool_521@qq.com", "haojunmei1982@");
+        EmailConfigBean emailConfigBean = new EmailConfigBean("你的发送邮箱", "你的接收邮箱", "发送邮箱的密码");
         Configuration configuration=Configuration.getInstance()
                 //你的邮件配置实例
                 .setEmailConfig(emailConfigBean)
